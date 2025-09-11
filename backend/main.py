@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request, UploadFile, File, Form # type: ignore 
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
+from fastapi.responses import JSONResponse # type: ignore
 from services.llm_service import get_llm_response, get_llm_response_with_files
 from typing import List
 import os
@@ -7,14 +8,27 @@ import os
 app = FastAPI()
 
 # Read frontend URL from environment (set in Render dashboard)
-FRONTEND_URL = os.getenv("FRONTEND_URL", "https://ai-assistant-trial.netlify.app")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+# Create list of allowed origins
+allowed_origins = [
+    FRONTEND_URL,
+    "https://ai-assistant-trial.netlify.app",  # Your specific Netlify URL
+    "https://*.netlify.app",  # Allow all Netlify subdomains (if needed)
+    "http://localhost:3000",  # Local development
+    "http://localhost:5173",  # Vite dev server
+    "http://127.0.0.1:5173",  # Alternative localhost
+]
+
+# Remove duplicates and empty strings
+allowed_origins = list(set(filter(None, allowed_origins)))
 
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL],   # Restrict to your Netlify URL in production
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -22,12 +36,30 @@ app.add_middleware(
 def read_root():
     return {"message": "LLM Chatbot Backend Active"}
 
+@app.head("/")
+def head_root():
+    return JSONResponse({"message": "OK"})
+
+@app.options("/chat")
+def chat_options():
+    return JSONResponse({"message": "OK"})
+
+@app.options("/chat-with-files")
+def chat_with_files_options():
+    return JSONResponse({"message": "OK"})
+
 @app.post("/chat")
 async def chat(request: Request):
-    data = await request.json()
-    user_message = data.get("message", "")
-    bot_response = await get_llm_response(user_message)
-    return {"response": bot_response}
+    try:
+        data = await request.json()
+        user_message = data.get("message", "")
+        bot_response = await get_llm_response(user_message)
+        return {"response": bot_response}
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e), "message": "Internal server error"}
+        )
 
 @app.post("/chat-with-files")
 async def chat_with_files(
@@ -81,7 +113,10 @@ async def chat_with_files(
         }
 
     except Exception as e:
-        return {
-            "response": f"Sorry, I encountered an error processing your files: {str(e)}",
-            "error": True
-        }
+        return JSONResponse(
+            status_code=500,
+            content={
+                "response": f"Sorry, I encountered an error processing your files: {str(e)}",
+                "error": True
+            }
+        )
