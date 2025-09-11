@@ -1,21 +1,26 @@
 import axios from "axios";
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 export const sendMessageToBot = async (message: string) => {
-  const response = await axios.post("http://localhost:8000/chat", { message });
+  const response = await axios.post(`${API_BASE}/chat`, { message });
   return response.data.response;
 };
 
-export const sendMessageToBotWithFiles = async (message: string, files: File[]): Promise<string> => {
+export const sendMessageToBotWithFiles = async (
+  message: string,
+  files: File[]
+): Promise<string> => {
   const formData = new FormData();
-  formData.append('message', message);
-  
+  formData.append("message", message);
+
   files.forEach((file) => {
-    formData.append('files', file);
+    formData.append("files", file);
   });
 
-  const response = await axios.post("http://localhost:8000/chat-with-files", formData, {
+  const response = await axios.post(`${API_BASE}/chat-with-files`, formData, {
     headers: {
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     },
   });
 

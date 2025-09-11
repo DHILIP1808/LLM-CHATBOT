@@ -1,15 +1,18 @@
-from fastapi import FastAPI, Request, UploadFile, File, Form
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request, UploadFile, File, Form # type: ignore 
+from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from services.llm_service import get_llm_response, get_llm_response_with_files
-from typing import List, Optional
-import json
+from typing import List
+import os
 
 app = FastAPI()
+
+# Read frontend URL from environment (set in Render dashboard)
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[FRONTEND_URL],   # Restrict to your Netlify URL in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,10 +35,9 @@ async def chat_with_files(
     files: List[UploadFile] = File(...)
 ):
     try:
-        # Process the uploaded files
         file_contents = []
         file_info = []
-        
+
         for file in files:
             content = await file.read()
             file_info.append({
@@ -43,10 +45,8 @@ async def chat_with_files(
                 "content_type": file.content_type,
                 "size": len(content)
             })
-            
-            # Handle different file types
+
             if file.content_type.startswith('text/') or file.content_type == 'application/json':
-                # Text files
                 try:
                     text_content = content.decode('utf-8')
                     file_contents.append({
@@ -61,28 +61,25 @@ async def chat_with_files(
                         "content": f"Binary file with {len(content)} bytes"
                     })
             elif file.content_type.startswith('image/'):
-                # Image files - you might want to add image processing here
                 file_contents.append({
                     "filename": file.filename,
-                    "type": "image", 
+                    "type": "image",
                     "content": f"Image file: {file.filename} ({len(content)} bytes)"
                 })
             else:
-                # Other file types
                 file_contents.append({
                     "filename": file.filename,
                     "type": "other",
                     "content": f"File: {file.filename} ({file.content_type}, {len(content)} bytes)"
                 })
-        
-        # Get LLM response with file context
+
         bot_response = await get_llm_response_with_files(message, file_contents)
-        
+
         return {
             "response": bot_response,
             "files_processed": file_info
         }
-        
+
     except Exception as e:
         return {
             "response": f"Sorry, I encountered an error processing your files: {str(e)}",
