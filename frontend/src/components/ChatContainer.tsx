@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { sendMessageToBot } from "../utils/api";
+import { sendMessageToBot, sendMessageToBotWithFiles } from "../utils/api";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 import ChatHeader from "./ChatHeader";
@@ -20,16 +20,45 @@ const ChatContainer = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async (text: string) => {
-    const userMsg: Message = { id: uuidv4(), sender: "user", content: text };
+  const handleSend = async (text: string, files?: File[]) => {
+    // Create user message with text and file info
+    let messageContent = text;
+    if (files && files.length > 0) {
+      const fileNames = files.map(f => f.name).join(', ');
+      messageContent = text 
+        ? `${text}\n\n📎 Attached files: ${fileNames}`
+        : `📎 Attached files: ${fileNames}`;
+    }
+
+    const userMsg: Message = { 
+      id: uuidv4(), 
+      sender: "user", 
+      content: messageContent,
+      files: files
+    };
+    
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
 
     try {
-      const response = await sendMessageToBot(text);
-      const botMsg: Message = { id: uuidv4(), sender: "bot", content: response };
+      let response: string;
+      
+      if (files && files.length > 0) {
+        // Handle file upload
+        response = await sendMessageToBotWithFiles(text, files);
+      } else {
+        // Regular text message
+        response = await sendMessageToBot(text);
+      }
+      
+      const botMsg: Message = { 
+        id: uuidv4(), 
+        sender: "bot", 
+        content: response 
+      };
       setMessages((prev) => [...prev, botMsg]);
     } catch (error) {
+      console.error('Error sending message:', error);
       const errorMsg: Message = {
         id: uuidv4(),
         sender: "bot",
@@ -42,7 +71,6 @@ const ChatContainer = () => {
   };
 
   return (
-    // FIXED: Removed max-w-4xl and mx-auto to allow full width
     <div className="w-full h-screen flex flex-col bg-white shadow-xl overflow-hidden border border-gray-200">
       <ChatHeader />
       
@@ -64,7 +92,7 @@ const ChatContainer = () => {
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-3">Welcome to AI Assistant</h3>
               <p className="text-gray-500 max-w-md text-lg leading-relaxed">
-                Start a conversation by typing a message below. I'm here to help with any questions you have!
+                Start a conversation by typing a message below. You can also attach files! I'm here to help with any questions you have.
               </p>
             </div>
           )}

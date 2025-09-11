@@ -18,25 +18,25 @@ const MessageBubble = ({ message, isLatest, formatResponse }: Props) => {
     const inlineCodeRegex = /`([^`]+)`/g;
     let result = content;
 
-    // Replace code blocks without copy button
+    // Replace code blocks with consistent styling
     result = result.replace(codeBlockRegex, (_match, language, code) => {
       const languageLabel = language || 'text';
       const escapedCode = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-      return `<div class="code-block-container my-4 relative">
-        <div class="bg-gray-900 rounded-lg overflow-hidden">
-          <div class="px-4 py-2 bg-gray-800 text-gray-300 text-sm font-mono">
+      return `<div class="my-4">
+        <div class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+          <div class="px-3 py-2 bg-gray-100 text-gray-600 text-xs font-medium border-b border-gray-200">
             ${languageLabel}
           </div>
-          <pre class="p-4 overflow-x-auto"><code class="text-gray-100 font-mono text-sm leading-relaxed whitespace-pre">${escapedCode}</code></pre>
+          <pre class="p-3 overflow-x-auto"><code class="text-gray-800 font-mono text-sm leading-relaxed whitespace-pre">${escapedCode}</code></pre>
         </div>
       </div>`;
     });
 
-    // Replace inline code
+    // Replace inline code with consistent styling
     result = result.replace(inlineCodeRegex, (_, code) => {
       const escapedCode = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      return `<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800">${escapedCode}</code>`;
+      return `<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-700 border border-gray-200">${escapedCode}</code>`;
     });
 
     // Convert line breaks to HTML
