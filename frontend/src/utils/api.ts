@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL || "https://llm-chatbot-4nk4.onrender.com/";
 
 export const sendMessageToBot = async (message: string) => {
   const response = await axios.post(`${API_BASE}/chat`, { message });
