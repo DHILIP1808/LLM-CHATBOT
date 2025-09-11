@@ -25,4 +25,14 @@ dist-ssr
 
 
 
+backend/venv/
+backend/__pycache__/
+*.pyc
 .env
+.env.*
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+# OS / Editor
+.DS_Store
+.vscode/
