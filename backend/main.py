@@ -7,7 +7,7 @@ import os
 app = FastAPI()
 
 # Read frontend URL from environment (set in Render dashboard)
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://ai-assistant-trial.netlify.app")
 
 # Enable CORS
 app.add_middleware(
