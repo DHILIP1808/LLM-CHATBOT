@@ -56,7 +56,7 @@ const MessageInput = ({ onSend, isLoading = false }: Props) => {
 
   return (
     <div className="border-t border-gray-200 bg-white px-6 py-4">
-      <div className="max-w-screen-2xl mx-auto">
+      <div className="max-w-4xl mx-auto px-6">
         {/* Selected Files Display */}
         {selectedFiles.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">

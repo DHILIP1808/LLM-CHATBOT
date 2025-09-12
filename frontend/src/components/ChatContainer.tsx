@@ -84,44 +84,46 @@ const ChatContainer = () => {
             display: none;
           }
         `}</style>
-        <div className="h-full overflow-y-auto px-6 py-6 space-y-2 hide-scrollbar">
-          {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
-                <MessageCircle className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-3">Welcome to AI Assistant</h3>
-              <p className="text-gray-500 max-w-md text-lg leading-relaxed">
-                Start a conversation by typing a message below. You can also attach files! I'm here to help with any questions you have.
-              </p>
-            </div>
-          )}
-          
-          {messages.map((msg, index) => (
-            <MessageBubble 
-              key={msg.id} 
-              message={msg} 
-              isLatest={index === messages.length - 1}
-            />
-          ))}
-          
-          {isLoading && (
-            <div className="flex justify-start mb-4">
-              <div className="flex items-end space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center shadow-sm">
-                  <Bot className="w-4 h-4 text-white" />
+        <div className="h-full overflow-y-auto hide-scrollbar">
+          <div className="max-w-4xl mx-auto px-6 py-6 space-y-2">
+            {messages.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                  <MessageCircle className="w-10 h-10 text-white" />
                 </div>
-                <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-gray-200">
-                  <div className="flex space-x-1 items-center">
-                    <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-sm text-gray-500 ml-2">Thinking...</span>
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">Welcome to AI Assistant</h3>
+                <p className="text-gray-500 max-w-md text-lg leading-relaxed">
+                  Start a conversation by typing a message below. You can also attach files! I'm here to help with any questions you have.
+                </p>
+              </div>
+            )}
+            
+            {messages.map((msg, index) => (
+              <MessageBubble 
+                key={msg.id} 
+                message={msg} 
+                isLatest={index === messages.length - 1}
+              />
+            ))}
+            
+            {isLoading && (
+              <div className="flex justify-start mb-4">
+                <div className="flex items-end space-x-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center shadow-sm">
+                    <Bot className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-gray-200">
+                    <div className="flex space-x-1 items-center">
+                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-sm text-gray-500 ml-2">Thinking...</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
         </div>
       </div>
       
