@@ -20,6 +20,23 @@ const ChatContainer = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Handle viewport height for mobile devices
+  useEffect(() => {
+    const setViewportHeight = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    setViewportHeight();
+    window.addEventListener('resize', setViewportHeight);
+    window.addEventListener('orientationchange', setViewportHeight);
+
+    return () => {
+      window.removeEventListener('resize', setViewportHeight);
+      window.removeEventListener('orientationchange', setViewportHeight);
+    };
+  }, []);
+
   const handleSend = async (text: string, files?: File[]) => {
     // Create user message with text and file info
     let messageContent = text;
@@ -71,10 +88,13 @@ const ChatContainer = () => {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col bg-white shadow-xl overflow-hidden border border-gray-200">
+    <div 
+      className="w-full flex flex-col bg-white shadow-xl overflow-hidden border border-gray-200"
+      style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+    >
       <ChatHeader />
       
-      <div className="flex-1 overflow-hidden bg-gradient-to-b from-gray-50 to-white">
+      <div className="flex-1 overflow-hidden bg-gradient-to-b from-gray-50 to-white min-h-0">
         <style>{`
           .hide-scrollbar {
             -ms-overflow-style: none;
@@ -83,16 +103,40 @@ const ChatContainer = () => {
           .hide-scrollbar::-webkit-scrollbar {
             display: none;
           }
+          
+          /* Mobile-specific adjustments */
+          @media (max-width: 768px) {
+            .mobile-container {
+              height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+              height: calc(100dvh);
+            }
+            
+            .mobile-messages {
+              padding: 1rem 0.75rem;
+            }
+            
+            .mobile-welcome {
+              padding: 1rem;
+            }
+          }
+          
+          /* Support for dynamic viewport units */
+          @supports (height: 100dvh) {
+            .mobile-container {
+              height: 100dvh;
+            }
+          }
         `}</style>
+        
         <div className="h-full overflow-y-auto hide-scrollbar">
-          <div className="max-w-4xl mx-auto px-6 py-6 space-y-2">
+          <div className="max-w-4xl mx-auto px-6 py-6 space-y-2 mobile-messages">
             {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
-                  <MessageCircle className="w-10 h-10 text-white" />
+              <div className="flex flex-col items-center justify-center h-full text-center mobile-welcome">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 md:mb-6 shadow-lg">
+                  <MessageCircle className="w-8 h-8 md:w-10 md:h-10 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">Welcome to AI Assistant</h3>
-                <p className="text-gray-500 max-w-md text-lg leading-relaxed">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2 md:mb-3">Welcome to AI Assistant</h3>
+                <p className="text-gray-500 max-w-md text-base md:text-lg leading-relaxed px-4">
                   Start a conversation by typing a message below. You can also attach files! I'm here to help with any questions you have.
                 </p>
               </div>
@@ -109,13 +153,13 @@ const ChatContainer = () => {
             {isLoading && (
               <div className="flex justify-start mb-4">
                 <div className="flex items-end space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center shadow-sm">
-                    <Bot className="w-4 h-4 text-white" />
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center shadow-sm">
+                    <Bot className="w-3 h-3 md:w-4 md:h-4 text-white" />
                   </div>
-                  <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-gray-200">
+                  <div className="bg-white rounded-2xl px-3 py-2 md:px-4 md:py-3 shadow-sm border border-gray-200">
                     <div className="flex space-x-1 items-center">
-                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm text-gray-500 ml-2">Thinking...</span>
+                      <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-xs md:text-sm text-gray-500 ml-2">Thinking...</span>
                     </div>
                   </div>
                 </div>
